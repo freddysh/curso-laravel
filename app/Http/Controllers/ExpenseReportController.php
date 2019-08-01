@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\ExpenseReport;
+use App\Mail\SummaryReport;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class ExpenseReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -113,4 +119,18 @@ class ExpenseReportController extends Controller
         $report=ExpenseReport::find($id);
         return view('expenseReport.confirm-delete',compact('report'));
     }
+    public function confirm_send_email($id)
+    {
+        //
+        $report=ExpenseReport::find($id);
+        return view('expense.confirm-send-email',compact('report'));
+    }
+    public function send_email(Request $request, $id)
+    {
+        //
+        $report=ExpenseReport::find($id);
+        Mail::to($request->email)->send(new SummaryReport($report));
+        return redirect()->route('expense_reports.show',$id);
+    }
+
 }
